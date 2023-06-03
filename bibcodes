@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bibliotheek codes</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        form {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        select,
+        output {
+            display: block;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .output-container {
+            margin-top: 20px;
+            background-color: #ffffff;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bibliotheek codes</h1>
+
+    <form id="reservation-form">
+        <label for="verdiep-select">Verdiep:</label>
+        <select id="verdiep-select" onchange="updateAfdelingen()">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select>
+
+        <label for="afdeling-select">Afdeling:</label>
+        <select id="afdeling-select" onchange="updateZones()">
+            <!-- Afdelingen zullen hier dynamisch worden ingevuld -->
+        </select>
+
+        <label for="zone-select">Zone:</label>
+        <select id="zone-select" onchange="updatePlaatsen()">
+            <!-- Zones zullen hier dynamisch worden ingevuld -->
+        </select>
+
+<label for="nummer-select">Nummer:</label>
+        <select id="plaats-select" onchange="updateIncheckcode();">
+    <!-- Plaatsen zullen hier dynamisch worden ingevuld -->
+</select>
+
+
+        <br>
+
+        <label for="plaats-output">Plaats:</label>
+        <output id="plaats-output"></output>
+
+        <label for="incheckcode-output">Code:</label>
+        <output id="incheckcode-output"></output>
+
+        <br>
+
+<button type="button" onclick="copyToClipboard()">Kopieer Code</button>
+
+<script>
+    function copyToClipboard() {
+        const incheckcodeOutput = document.getElementById("incheckcode-output");
+        const code = incheckcodeOutput.textContent;
+
+        navigator.clipboard.writeText(code)
+            .then(() => {
+                alert("Code is gekopieerd naar het klembord!");
+            })
+            .catch((error) => {
+                console.error("Fout bij het kopiëren naar het klembord:", error);
+            });
+    }
+</script>
+
+
+
+    </form>
+
+    <script>
+        const afdelingenPerVerdiep = {
+            "0": ["ALG"],
+            "1": ["GES", "FILO", "T&L"],
+            "2": ["SW", "OW", "RECH"],
+            "3": ["BE/IOB"]
+        };
+
+        const zonesPerAfdeling = {
+            "ALG": ["A", "B", "C", "D", "E", "F"],
+            "GES": ["A", "B", "C"],
+            "FILO": ["A", "B", "C"],
+            "T&L": ["A", "B", "C", "D", "E", "G"],
+            "SW": ["A", "B", "C"],
+            "OW": ["A", "B"],
+            "RECH": ["A", "B", "C", "D", "E"],
+            "BE/IOB": ["A", "B", "C", "D", "E"]
+        };
+
+        const stoelenPerZone = {
+            "0-ALG-A": 40,
+            "0-ALG-B": 18,
+            "0-ALG-C": 18,
+            "0-ALG-D": 16,
+            "0-ALG-E": 26,
+            "0-ALG-F": 23,
+            "1-GES-A": 16,
+            "1-GES-B": 36,
+            "1-GES-C": 10,
+            "1-FILO-A": 8,
+            "1-FILO-B": 20,
+            "1-FILO-C": 9,
+            "1-T&L-A": 24,
+            "1-T&L-B": 24,
+            "1-T&L-C": 18,
+            "1-T&L-D": 8,
+            "1-T&L-E": 24,
+            "1-T&L-G": 18,
+            "2-SW-A": 16,
+            "2-SW-B": 36,
+            "2-SW-C": 10,
+            "2-OW-A": 16,
+            "2-OW-B": 28,
+  "2-RECH-A": 48,
+
+            "2-RECH-B": 34,
+            "2-RECH-C": 8,
+            "2-RECH-D": 8,
+            "2-RECH-E": 9,
+            "3-BE/IOB-A": 16,
+            "3-BE/IOB-B": 32,
+            "3-BE/IOB-C": 9,
+            "3-BE/IOB-D": 9,
+            "3-BE/IOB-E": 20
+        };
+
+const incheckcodes = {
+    "0-ALG-A1": "123663"
+    // Voeg hier andere incheckcodes toe
+};
+
+// Voeg de functie toe om de dropdowns te vullen
+function fillDropdown(elementId, options) {
+    const dropdown = document.getElementById(elementId);
+    dropdown.innerHTML = ""; // Leeg de dropdown
+
+    for (let i = 0; i < options.length; i++) {
+        const option = document.createElement("option");
+        option.value = options[i];
+        option.text = options[i];
+        dropdown.appendChild(option);
+    }
+}
+
+function updateAfdelingen() {
+    const verdiepSelect = document.getElementById("verdiep-select");
+    const afdelingSelect = document.getElementById("afdeling-select");
+    const verdiep = verdiepSelect.value;
+
+    // Leeg de afdeling selectie
+    afdelingSelect.innerHTML = "";
+
+    // Voeg de opties toe op basis van het geselecteerde verdiep
+    const afdelingen = afdelingenPerVerdiep[verdiep];
+    for (let i = 0; i < afdelingen.length; i++) {
+        const afdeling = afdelingen[i];
+        const option = document.createElement("option");
+        option.value = afdeling;
+        option.text = afdeling;
+        afdelingSelect.appendChild(option);
+    }
+
+    // Reset de zone en plaats selecties
+    updateZones();
+    updatePlaatsen();
+    updateIncheckcode();
+}
+
+function updateZones() {
+    const afdelingSelect = document.getElementById("afdeling-select");
+    const zoneSelect = document.getElementById("zone-select");
+    const afdeling = afdelingSelect.value;
+
+    // Leeg de zone selectie
+    zoneSelect.innerHTML = "";
+
+    // Voeg de opties toe op basis van de geselecteerde afdeling
+    const zones = zonesPerAfdeling[afdeling];
+    for (let i = 0; i < zones.length; i++) {
+        const zone = zones[i];
+        const option = document.createElement("option");
+        option.value = zone;
+        option.text = zone;
+        zoneSelect.appendChild(option);
+    }
+
+    // Reset de plaats selectie
+    updatePlaatsen();
+    updateIncheckcode();
+}
+
+function updatePlaatsen() {
+    const verdiepSelect = document.getElementById("verdiep-select");
+    const afdelingSelect = document.getElementById("afdeling-select");
+    const zoneSelect = document.getElementById("zone-select");
+    const plaatsSelect = document.getElementById("plaats-select");
+
+    const verdiep = verdiepSelect.value;
+    const afdeling = afdelingSelect.value;
+    const zone = zoneSelect.value;
+    const stoelenData = stoelenPerZone[`${verdiep}-${afdeling}-${zone}`];
+
+    if (`${verdiep}-${afdeling}-${zone}` === "2-RECH-A") {
+        plaatsSelect.innerHTML = ""; // Leeg de plaats selectie
+
+        for (let i = 7; i <= 54; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.text = i;
+            plaatsSelect.appendChild(option);
+        }
+    } else {
+        const stoelen = stoelenPerZone[`${verdiep}-${afdeling}-${zone}`];
+        plaatsSelect.innerHTML = ""; // Leeg de plaats selectie
+
+       
+
+
+    for (let i = 1; i <= stoelen; i++) {
+      const option = document.createElement("option");
+      option.value = i;
+      option.text = i;
+      plaatsSelect.appendChild(option);
+    }
+  }
+
+  // Update de weergegeven plaats en incheckcode
+  updateIncheckcode();
+}
+        function updateIncheckcode() {
+            const verdiepSelect = document.getElementById("verdiep-select");
+            const afdelingSelect = document.getElementById("afdeling-select");
+            const zoneSelect = document.getElementById("zone-select");
+            const plaatsSelect = document.getElementById("plaats-select");
+            const plaatsOutput = document.getElementById("plaats-output");
+            const incheckcodeOutput = document.getElementById("incheckcode-output");
+
+            const verdiep = verdiepSelect.value;
+            const afdeling = afdelingSelect.value;
+            const zone = zoneSelect.value;
+            const plaats = plaatsSelect.value;
+
+            const tafelcode = `${verdiep}-${afdeling}-${zone}${plaats}`;
+
+            plaatsOutput.textContent = `${tafelcode}`;
+            incheckcodeOutput.textContent = `${incheckcodes[tafelcode]}`;
+        }
+
+        function copyToClipboard() {
+            const incheckcodeOutput = document.getElementById("incheckcode-output");
+            const code = incheckcodeOutput.textContent.split(":")[1].trim();
+
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    alert("Code is gekopieerd naar het klembord!");
+                })
+                .catch((error) => {
+                    console.error("Fout bij het kopiëren naar het klembord:", error);
+                });
+        }
+    </script>
+</body>
+</html>
